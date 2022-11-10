@@ -1,5 +1,5 @@
 ---
-title: "Community composition; snow"
+title: "Community composition; SIMPER; NMDS"
 author: "Ellinor Jakobsson"
 date: "7/12/2022"
 output: html_document
