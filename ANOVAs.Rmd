@@ -1,0 +1,22 @@
+---
+title: "ANOVA"
+author: "Ellinor Jakobsson"
+date: '2022-11-10'
+output: html_document
+---
+```{r}
+#Set working directory
+dir <- ""
+setwd(dir)
+#List all files in the directory to check that you're in the right place
+list.files()
+####IMPORT DATA####
+#Community composition data
+Community_data <- read_excel(paste(dir, "/Phytoplankton_data.xlsx", sep = ""))
+head(Community_data)
+
+
+
+
+```
+
