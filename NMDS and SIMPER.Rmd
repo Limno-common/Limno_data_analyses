@@ -1,0 +1,107 @@
+---
+title: "Community composition; snow"
+author: "Ellinor Jakobsson"
+date: "7/12/2022"
+output: html_document
+---
+
+*Import all data  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+
+#Read function to replace NA with 0. In case used later on.
+hybrd.rplc_if <- function(x) { mutate_if(x, is.numeric, ~replace(., is.na(.), 0)) }
+#Set working directory
+dir <- ""
+setwd(dir)
+#List all files in the directory to check that you're in the right place
+list.files()
+####IMPORT DATA####
+#Community composition data
+Community_data <- read_excel(paste(dir, "/Phytoplankton_data.xlsx", sep = ""))
+head(Community_data)
+```
+*Ellis theme for plots
+```{r include=FALSE}
+#Theme for plots I like to use 
+ellis <-theme_bw()+
+  theme(axis.text.x=element_text(size=10, colour="black", angle =45, hjust = 1),axis.text.y=element_text(size=10, colour="black"),
+        strip.text = element_text(size=10,color = "white", face = "bold"),
+        strip.background = element_rect(fill = "grey20"),
+        axis.title.y=element_text(size=12),
+        axis.title.x=element_text(size=12),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_rect(fill = "white", color = "grey20"),
+        plot.title = element_text(size=16, face = "bold"),
+        panel.border = element_rect(colour = "black"))
+```
+
+* Simper analysis
+```{r}
+#Similarity percentage (SIMPER) analysis
+simper_data <- Community_data
+#Choose columns with environmental grouping data, e.g., Treatments, Months
+simper.env <- Simper_data[,-c(1)]
+#Choose columns containing all species (wide format)
+simper.spec <- Simper_data[, -c(1:3)]
+library(vegan)
+sim <- with(simper.env, simper(simper.spec, Treatment))
+sim
+
+```
+
+* NMDS of mean CC per month and year in 4 treatments (hellinger transformed)
+```{r}
+#function to replace NAs with 0, not necessary if you want to remove NAs
+NMDS_data <- hybrd.rplc_if(NMDS_data)
+#Choose columns with species data (wide format)
+NMDS_spec <- NMDS_data[, c(4:146)]
+#Choose columns with environmental grouping data, e.g., Months, Treatment
+NMDS_env <- NMDS_data %>% select(Treatment, Year, Month) #OR
+NMDS_env <- NMDS_data[, c(1:3)]
+
+library(vegan)
+#transform with hellinger to give weight to rare taxa:
+sp.hel <- decostand(NMDS_spec,method="hellinger") 
+nmds <- metaMDS(sp.hel, autotransform = F) #OR
+nmds <- metaMDS(NMDS_spec, autotransform = F)
+
+#Stress trial 100, dimensions to 2 
+vare.mds <- metaMDS(NMDS_spec, k=2, trymax=100, autotransform = F)
+data.scores <- as.data.frame(scores(vare.mds))  #Using the scores function from vegan to extract the site scores and convert to a data.frame
+
+data.scores$site <- rownames(data.scores)  # create a column of site names, from the rownames of data.scores
+
+data.scores$Treatment <- NMDS_env$Treatment
+data.scores$Year <- NMDS_env$Year
+data.scores$Month <- NMDS_env$Month
+
+head(data.scores)  #look at the data
+
+Treatment1 <- data.scores[data.scores$Treatment == "0-15", ][chull(data.scores[data.scores$Treatment == 
+    "0-15", c("NMDS1", "NMDS2")]), ]  # hull values for grp A
+Treatment2 <- data.scores[data.scores$Treatment == "15-20", ][chull(data.scores[data.scores$Treatment == 
+    "15-20", c("NMDS1", "NMDS2")]), ]  # hull values for grp B
+
+hull.data <- rbind(Treatment1, Treatment2)  #combine grp.a and grp.b
+hull.data
+
+species.scores <- as.data.frame(scores(vare.mds, "species"))  #Using the scores function from vegan to extract the species scores and convert to a data.frame
+species.scores$species <- rownames(species.scores)  # create a column of species, from the rownames of species.scores
+head(species.scores)  #look at the data
+
+p <- ggplot() + 
+  geom_polygon(data=hull.data,aes(x=NMDS1,y=NMDS2, fill=Treatment, group=Treatment), alpha=0.30) +
+   geom_text(data=data.scores,aes(x=NMDS1,y=NMDS2,label=Year),alpha=0.5) +  # add the species labels
+  geom_point(data=data.scores,aes(x=NMDS1,y=NMDS2, colour=Month),size=3) + # add the point markers
+ geom_text(data=species.scores ,aes(x=NMDS1,y=NMDS2,label=species),size=2,vjust=0) +  # add the site labels
+  coord_equal() + scale_colour_gradientn( #add if numeric data and want gradient
+  guide = "colourbar",
+  aesthetics = "colour",
+  colours=rainbow(4)) + ellis #Add theme
+```
