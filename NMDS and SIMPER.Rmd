@@ -95,6 +95,7 @@ species.scores <- as.data.frame(scores(vare.mds, "species"))  #Using the scores 
 species.scores$species <- rownames(species.scores)  # create a column of species, from the rownames of species.scores
 head(species.scores)  #look at the data
 
+####PLOTTING####
 p <- ggplot() + 
   geom_polygon(data=hull.data,aes(x=NMDS1,y=NMDS2, fill=Treatment, group=Treatment), alpha=0.30) +
    geom_text(data=data.scores,aes(x=NMDS1,y=NMDS2,label=Year),alpha=0.5) +  # add the species labels
