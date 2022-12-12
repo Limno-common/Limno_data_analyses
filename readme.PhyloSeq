@@ -1,0 +1,17 @@
+I use the R package PhyloSeq to do some initial checks on my ASV/OTU tables, as well as create barplots and heatmaps to display species diversity in my samples. A complete tutorial can be found here: https://joey711.github.io/phyloseq/
+To create an initial PhyloSeq object you need an ASV/OTU count table, a taxonomy table (you can e.g. create these with dada2) and a table with metadata for your samples. This metadata table could e.g. look like this (you can included as many data as you want):
+
+sampleID	sample	lake	date	monthday	month	day	fraction
+EK_1	EK_0310_10-100	EK	2020-03-10	310	3	10	10-100
+EK_2	EK_0310_0.2-10	EK	2020-03-10	310	3	10	0.2-10
+EK_3	EK_0317_10-100	EK	2020-03-17	317	3	17	10-100
+EK_4	EK_0317_0.2-10	EK	2020-03-17	317	3	17	0.2-10
+EK_5	EK_0324_10-100	EK	2020-03-24	324	3	24	10-100
+EK_6	EK_0324_0.2-10	EK	2020-03-24	324	3	24	0.2-10
+EK_7	EK_0330_10-100	EK	2020-03-30	330	3	30	10-100
+EK_8	EK_0330_0.2-10	EK	2020-03-30	330	3	30	0.2-10
+EK_9	EK_0406_10-100	EK	2020-04-06	406	4	6	10-100
+EK_10	EK_0406_0.2-10	EK	2020-04-06	406	4	6	0.2-10
+EK_11	EK_0415_10-100	EK	2020-04-15	415	4	15	10-100
+EK_12	EK_0415_0.2-10	EK	2020-04-15	415	4	15	0.2-10
+
