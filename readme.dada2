@@ -1,0 +1,2 @@
+DADA2 is an R package for quality control, filtering, ASV calling and taxonomic assignment of amplicon sequencing reads. This package can directly work with fastq.gz files. A complete tutorial can be found here: https://benjjneb.github.io/dada2/ 
+Maybe read up on the difference between OTU and ASV to figure out, if this approach works for you.
