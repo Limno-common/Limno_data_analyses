@@ -1,0 +1,23 @@
+I use the raxml.slurm bash script to build maximum likelihood phylogenetic trees with the software RAxML on the Rackham Uppmax computing cluster.
+RAxML is installed on Rackham and gets regularly updated, so the version of the module (raxml/8.2.12-gcc) will change over time. You can find a list with the installed software, including versions, here: https://www.uppmax.uu.se/resources/software/installed-software/
+Save the raxml.slurm file in your working directory on one of the Uppmax servers and submit the described job with the following command: sbatch raxml.slurm
+You can check on the progress of your submitted job with the commands jobinfo --job jobnumber OR jobinfo -u username
+
+#SBATCH -A your project number
+#SBATCH -J a name for this job
+#SBATCH -o file which records process information, very handy to figure out error messages, I have one folder in my working directory that is dedicated to these kinds of files
+#SBATCH -t How many hours:minutes:seconds your job is expected to run? Be generous, as you're job will otherwise get cancelled before it's finished
+#SBATCH -p core OR node
+#SBATCH -n How many cores?
+
+More information about how to use slurm and submit jobs can be found here: https://www.uppmax.uu.se/support/user-guides/slurm-user-guide/
+
+RAxML specific commands:
+-s input file with aligned sequences (e.g. with MUSCLE or MAFFT), can be in phylip or fasta format 
+-n name of output file 
+-m mutation model 
+-o outgroup sequences 
+-T number of available cores
+
+You can find a complete tutorial for RAxML here:
+https://cme.h-its.org/exelixis/web/software/raxml/
