@@ -1,4 +1,4 @@
-# Function to write the DF raw output file into csv tables
+# Function to write the delayed fluorescence sensor raw output file into csv tables
 
 # Update 2023-04-06: addition of row_id
 
@@ -6,7 +6,8 @@ library(data.table)
 library(xml2)
 library(stringr)
 
-process_df_output_erken = function(df_txt_output, folder_out = "."){
+process_df_output_erken = function(df_txt_output, folder_out = ".",
+                                   merge_picurve = TRUE){
   # There are three types of measurements: composition, biomass, and pi-curve
   # Write a table for each of these
   df_composition = data.table()
@@ -89,6 +90,30 @@ process_df_output_erken = function(df_txt_output, folder_out = "."){
     
     assign(the_df, rbindlist(list(get(the_df), lst_to_add), fill = T))
     assign(the_row_id, get(the_row_id) + 1L)
+  }
+  
+  ### Correct df_picurve
+  # pi-curves are split into two separate "measurement" entries in the output
+  # file, but should be merged.
+  # This part is a bit cryptic, but what it does is; 1) group the paired row_ids,
+  # 2) extract the non-NA values from each column, and then 3) remove all-NA rows 
+  if(merge_picurve){
+    order_names = names(df_picurve)
+    orig_dates = df_picurve$date
+    df_picurve[, row_id := (row_id + 1L) %/% 2] # %/% = division without remainder
+    
+    # Check to avoid a wrong compilation of the data
+    num_dates = df_picurve[, length(unique(date)), by = row_id]
+    if(any(num_dates$V1 > 1)){
+      stop("Merging of the pi-curve file failed! Non-unique datetime per row_id")
+    }
+    
+    df_picurve = df_picurve[, lapply(.SD, function(x) c(x[!is.na(x)],
+                                            rep(NA, length(x) - length(f[!is.na(x)])))),
+                by = row_id, .SDcols = cols_to_collate]
+    df_picurve[, date := orig_dates]
+    setcolorder(df_picurve, neworder = order_names)
+    df_picurve = df_picurve[!is.na(darkrate)]
   }
   
   # Sort the tables by date
